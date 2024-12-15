@@ -1,26 +1,51 @@
 <template>
   <div id="home">
     <h1><router-link to="/">SSO.viktorir</router-link></h1>
-    <p><b>Single Sign-On service</b> for the services in the <b>.viktorir</b> ecosystem</p>
+    <p v-html="$t('home.description')"></p>
     <section id="cards">
-      <article class="card" id="signin">
-        <h2>Login</h2>
-        <p>Sign In once and stay signed in everywhere!</p>
-        <button @click="$router.push('signin')">Sign In</button>
+      <article v-if="accessToken" class="card" id="personal">
+        <h2>{{ $t('home.welcomeUserCard.header', {username: this.getUsername()}) }}</h2>
+        <p>{{ $t('home.welcomeUserCard.description') }}</p>
+        <button @click="$router.push('personal')">{{ $t('home.welcomeUserCard.button') }}</button>
+      </article>
+
+      <article v-if="!accessToken" class="card" id="signin">
+        <h2>{{ $t('home.loginCard.header') }}</h2>
+        <p>{{ $t('home.loginCard.description') }}</p>
+        <button @click="$router.push('signin')">{{ $t('home.loginCard.button') }}</button>
+      </article>
+
+      <article v-if="!accessToken" class="card" id="signup">
+        <h2>{{ $t('home.registerCard.header') }}</h2>
+        <p>{{ $t('home.registerCard.description') }}</p>
+        <button @click="$router.push('signup')">{{ $t('home.registerCard.button') }}</button>
       </article>
     </section>
   </div>
 </template>
 
-
-
 <script>
+import { jwtDecode } from 'jwt-decode';
+import { mapGetters } from 'vuex';
+
 export default {
-  name: 'HomeView'
+  name: 'HomeView',
+  computed: {
+    ...mapGetters('auth', ['accessToken'])
+  },
+  methods: {
+    getUsername() {
+      try {
+        const decodedToken = jwtDecode(this.accessToken);
+        const userLogin = decodedToken.login;
+        return userLogin
+      } catch (error) {
+        console.log(this.accessToken)
+      }
+    }
+  }
 }
 </script>
-
-
 
 <style lang="scss">
   $color-bg-dark: #1C1C1C;

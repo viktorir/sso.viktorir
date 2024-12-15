@@ -4,13 +4,15 @@ import (
 	"database/sql"
 	"github.com/gofiber/fiber/v2"
 	"golang.org/x/crypto/bcrypt"
+	"log"
 	"sso.viktorir_service/internal/model/token"
 	"sso.viktorir_service/internal/model/user"
 )
 
 type signInReq struct {
-	Login    string `json:"login"`
-	Password string `json:"password"`
+	Login       string `json:"login"`
+	Password    string `json:"password"`
+	RedirectURL string `json:"redirect_url"`
 }
 
 type signUpReq struct {
@@ -21,6 +23,7 @@ type signUpReq struct {
 	FirstName   string `json:"first_name"`
 	LastName    string `json:"last_name"`
 	FatherName  string `json:"father_name"`
+	RedirectURL string `json:"redirect_url"`
 }
 
 func SignUp(ctx *fiber.Ctx) error {
@@ -30,7 +33,7 @@ func SignUp(ctx *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
 
-	_, err = user.FindOneByLogin(req.Login)
+	_, err = user.FindByLogin(req.Login)
 	if err != sql.ErrNoRows {
 		if err != nil {
 			return err
@@ -43,7 +46,7 @@ func SignUp(ctx *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
 
-	id, err := user.CreateOne(req.Login, string(hashPassword), req.PhoneNumber, req.Email, req.FirstName, req.LastName, req.FatherName)
+	id, err := user.Create(req.Login, string(hashPassword), req.PhoneNumber, req.Email, req.FirstName, req.LastName, req.FatherName)
 	if err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
@@ -57,7 +60,7 @@ func SignIn(ctx *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
 
-	candidate, err := user.FindOneByLogin(req.Login)
+	candidate, err := user.FindByLogin(req.Login)
 	if err == sql.ErrNoRows {
 		return fiber.NewError(fiber.StatusBadRequest, "User not found!")
 	}
@@ -85,13 +88,32 @@ func SignIn(ctx *fiber.Ctx) error {
 	}
 
 	ctx.Cookie(&fiber.Cookie{
-		Name:    "refresh_token",
-		Value:   string(refresh),
-		Expires: refExp,
+		Name:     "refresh_token",
+		Value:    string(refresh),
+		Expires:  refExp,
+		HTTPOnly: true,
+		Secure:   true,
 	})
-	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{"access_token": access, "refresh_token": refresh})
+
+	log.Println(req.RedirectURL)
+	if req.RedirectURL == "" {
+		return ctx.Status(fiber.StatusOK).JSON(fiber.Map{"access_token": access})
+	}
+	return ctx.Redirect(req.RedirectURL)
 }
 
 func SignOut(ctx *fiber.Ctx) error {
+	refreshToken := ctx.Cookies("refresh_token", "")
+	if refreshToken == "" {
+		return fiber.NewError(fiber.StatusUnauthorized, "Refresh token not found in Cookies!")
+	}
+
+	ctx.Cookie(&fiber.Cookie{
+		Name:     "refresh_token",
+		Value:    "",
+		MaxAge:   -1,
+		HTTPOnly: true,
+		Secure:   true,
+	})
 	return ctx.SendStatus(fiber.StatusOK)
 }

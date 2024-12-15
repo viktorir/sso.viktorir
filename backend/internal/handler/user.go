@@ -15,7 +15,7 @@ func GetUser(ctx *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
 	if id != 0 {
-		foundUser, err := user.FindOneByID(id)
+		foundUser, err := user.FindByID(id)
 		if err == sql.ErrNoRows {
 			return fiber.NewError(fiber.StatusBadRequest, "User not found!")
 		}
@@ -27,7 +27,7 @@ func GetUser(ctx *fiber.Ctx) error {
 
 	loginParam := ctx.Query("login", "")
 	if loginParam != "" {
-		foundUser, err := user.FindOneByLogin(loginParam)
+		foundUser, err := user.FindByLogin(loginParam)
 		if err == sql.ErrNoRows {
 			return fiber.NewError(fiber.StatusBadRequest, "User not found!")
 		}

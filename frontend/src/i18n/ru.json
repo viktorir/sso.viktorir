@@ -1,0 +1,71 @@
+{
+  "home": {
+    "description": "<b>Сервис единого входа (Single Sign-On)</b> для сервисов экосистемы <b>.viktorir</b>",
+    "loginCard": {
+      "header": "Вход",
+      "description": "Войдите один раз и оставайтесь авторизованными везде!",
+      "button": "Войти"
+    },
+    "registerCard": {
+      "header": "Регистрация",
+      "description": "Зарегистрируйтесь и присоединяйтесь к нашей экосистеме!",
+      "button": "Зарегистрироваться"
+    },
+    "welcomeUserCard": {
+      "header": "Добро пожаловать, {username}!",
+      "description": "Чтобы получить доступ к вашему личному кабинету, нажмите кнопку ниже.",
+      "button": "Перейти в кабинет"
+    }
+  },
+  "signin": {
+    "login": "Логин",
+    "password": "Пароль",
+    "button": "Войти",
+    "noAccount": "Нет аккаунта?",
+    "signup": "Зарегистрируйтесь сейчас!",
+    "forgotPassword": "Забыли пароль?"
+  },
+  "signup": {
+    "login": "Логин",
+    "phoneNumber": "89001234567",
+    "email": "example{'@'}email.ru",
+    "firstName": "Имя",
+    "lastName": "Фамилия",
+    "fatherName": "Отчество",
+    "password": "Пароль",
+    "passwordRepeat": "Повторите пароль",
+    "button": "Зарегистрироваться",
+    "alreadyAccount": "Уже есть аккаунт?",
+    "signin": "Войдите сейчас!"
+  },
+  "personalMenu": {
+    "user": "Пользователь",
+    "services": "Сервисы",
+    "security": "Безопасность",
+    "settings": "Настройки",
+    "admin": "Админ панель",
+    "signout": "Выйти"
+  },
+  "profile": {
+    "heading": "Личный кабинет",
+    "username": "Логин",
+    "lastName": "Фамилия",
+    "firstName": "Имя",
+    "fatherName": "Отчество",
+    "phoneNumber": "Номер телефона",
+    "email": "Электронная почта"
+  },
+  "services": {
+    "heading": "Сервисы",
+    "description": "Описание",
+    "domain": "Домен"
+  },
+  "security": {
+    "heading": "Настройки безопасности",
+    "comingSoon": "Скоро будет доступно!"
+  },
+  "settings": {
+    "heading": "Настройки аккаунта",
+    "comingSoon": "Скоро будет доступно!"
+  }
+}

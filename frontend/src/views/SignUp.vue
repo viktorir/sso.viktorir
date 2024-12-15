@@ -1,25 +1,24 @@
 <template>
-    <section>
-      <h1 class="logo"><router-link to="/">SSO.viktorir</router-link></h1>
-      <hr>
-      <form @submit.prevent="signUpRouter">
-        <!-- <h2>Register</h2> -->
-        <input type="text" placeholder="Login" :value="login" @input="updateLogin" required>
-        <input type="tel" placeholder="+7-900-1234567" :value="phoneNumber" @input="updatePhoneNumber" required>
-        <input type="email" placeholder="Your@email.com" :value="email" @input="updateEmail">
-        <input type="text" placeholder="Last name" :value="lastName" @input="updateLastName">
-        <input type="text" placeholder="First name" :value="firstName" @input="updateFirstName">
-        <input type="text" placeholder="Father name" :value="fatherName" @input="updateFatherName">
-
-        <input type="password" placeholder="Password" :value="password" @input="updatePassword" required>
-        <input type="password" placeholder="Repeat your password" :value="passwordRepeat" @input="updatePasswordRepeat" required>
-        <button type="submit">Sign Up</button>
-        <p>Do you already have an account? <router-link to="/signin">SignIn now!</router-link></p>
-      </form>
-    </section>
-  </template>
+  <section>
+    <h1 class="logo"><router-link to="/">SSO.viktorir</router-link></h1>
+    <hr>
+    <form @submit.prevent="signUpRouter">
+      <!-- <h2>Register</h2> -->
+      <input type="text" :placeholder="$t('signup.login')" :value="login" @input="updateLogin" required>
+      <input type="tel" :placeholder="$t('signup.phoneNumber')" :value="phoneNumber" @input="updatePhoneNumber" required>
+      <input type="email" :placeholder="$t('signup.email')" :value="email" @input="updateEmail">
+      <input type="text" :placeholder="$t('signup.lastName')" :value="lastName" @input="updateLastName">
+      <input type="text" :placeholder="$t('signup.firstName')" :value="firstName" @input="updateFirstName">
+      <input type="text" :placeholder="$t('signup.fatherName')" :value="fatherName" @input="updateFatherName">
+      <input type="password" :placeholder="$t('signup.password')" :value="password" @input="updatePassword" required>
+      <input type="password" :placeholder="$t('signup.passwordRepeat')" :value="passwordRepeat" @input="updatePasswordRepeat" required>
+      <button type="submit">{{ $t('signup.button') }}</button>
+      <p>{{ $t('signup.alreadyAccount') }} <router-link to="/signin">{{ $t('signup.signin') }}</router-link></p>
+    </form>
+  </section>
+</template>
   
-  <script>
+<script>
   import { mapState, mapMutations, mapGetters, mapActions } from 'vuex';
   export default {
     name: 'SignUp',
@@ -134,12 +133,6 @@
           border: 2px solid $color-text-dark;
           border-radius: 10px;
         } 
-        input:required:hover {
-            border: 2px solid red;
-        }
-        input:required:hover:not(:placeholder-shown) {
-            border: 2px solid green;
-        }
   
         button {
           margin: 1em 0;

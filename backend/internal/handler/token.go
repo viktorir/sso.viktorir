@@ -3,25 +3,18 @@ package handler
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
-	"log"
 	token "sso.viktorir_service/internal/model/token"
 	"time"
 )
 
-type refreshRequest struct {
-	RefreshToken string `json:"refresh_token"`
-}
-
-func Refresh(ctx *fiber.Ctx) error {
-	req := new(refreshRequest)
-	err := ctx.BodyParser(req)
-	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+func Refresh(ctx *fiber.Ctx) (err error) {
+	refreshToken := ctx.Cookies("refresh_token", "")
+	if refreshToken == "" {
+		return fiber.NewError(fiber.StatusUnauthorized, "Refresh token not found in Cookies!")
 	}
 
 	claims := jwt.MapClaims{}
-	_, err = jwt.ParseWithClaims(req.RefreshToken, claims, token.KeyFunc)
-
+	_, err = jwt.ParseWithClaims(refreshToken, claims, token.KeyFunc)
 	if err != nil {
 		return fiber.NewError(fiber.StatusUnauthorized, "Invalid refresh token: "+err.Error())
 	}
@@ -34,7 +27,6 @@ func Refresh(ctx *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusUnauthorized, "Token does not have an expiration time")
 	}
 
-	log.Println(claims)
 	userID := int(claims["user_id"].(float64))
 	userRoles := claims["roles"].(map[string]interface{})
 	userLogin := claims["login"].(string)
@@ -51,11 +43,13 @@ func Refresh(ctx *fiber.Ctx) error {
 	}
 
 	ctx.Cookie(&fiber.Cookie{
-		Name:    "refresh_token",
-		Value:   string(refresh),
-		Expires: refExp,
+		Name:     "refresh_token",
+		Value:    string(refresh),
+		Expires:  refExp,
+		HTTPOnly: true,
+		Secure:   true,
 	})
-	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{"access_token": access, "refresh_token": refresh})
+	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{"access_token": access})
 }
 
 func GetRefresh(ctx *fiber.Ctx) error {

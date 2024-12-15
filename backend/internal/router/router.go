@@ -28,4 +28,6 @@ func Setup(app *fiber.App) {
 	v1.Get("/refresh", handler.GetRefresh)
 
 	v1.Get("/user", middleware.Autorized(), handler.GetUser)
+
+	v1.Get("/service", middleware.Autorized(), handler.GetServices)
 }

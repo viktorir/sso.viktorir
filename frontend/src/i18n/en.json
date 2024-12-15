@@ -1,0 +1,71 @@
+{
+  "home": {
+    "description": "<b>Single Sign-On service</b> for the services in the <b>.viktorir</b> ecosystem",
+    "loginCard": {
+      "header": "Login",
+      "description": "Sign In once and stay signed in everywhere!",
+      "button": "Sign In"
+    },
+    "registerCard": {
+      "header": "Register",
+      "description": "Sign Up and join our ecosystem!",
+      "button": "Sign Up"
+    },
+    "welcomeUserCard": {
+      "header": "Welcome, {username}!",
+      "description": "To access your personal account, click the button below.",
+      "button": "Go to Account"
+    }
+  },
+  "signin": {
+    "login": "Login",
+    "password": "Password",
+    "button": "Sign In",
+    "noAccount": "Don’t have account?",
+    "signup": "SingUp now!",
+    "forgotPassword": "Forgot password?"
+  },
+  "signup": {
+    "login": "Login",
+    "phoneNumber": "89001234567",
+    "email": "example{'@'}email.com",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "fatherName": "Father name",
+    "password": "Password",
+    "passwordRepeat": "Repeat your password",
+    "button": "Sign Up",
+    "alreadyAccount": "Do you already have an account?",
+    "signin": "SignIn now!"
+  },
+  "personalMenu": {
+    "user": "User",
+    "services": "Services",
+    "security": "Security",
+    "settings": "Settings",
+    "admin": "Admin Panel",
+    "signout": "Sign Out"
+  },
+  "profile": {
+    "heading": "Personal account",
+    "username": "Username",
+    "lastName": "Last name",
+    "firstName": "First name",
+    "fatherName": "Father name",
+    "phoneNumber": "Phone number",
+    "email": "Email"
+  },
+  "services": {
+    "heading": "Services",
+    "description": "Description",
+    "domain": "Domain"
+  },
+  "security": {
+    "heading": "Security Settings",
+    "comingSoon": "Coming Soon!"
+  },
+  "settings": {
+    "heading": "Account Settings",
+    "comingSoon": "Coming Soon!"
+  }
+}

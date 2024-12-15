@@ -1,54 +1,47 @@
 import { createRouter, createWebHistory } from 'vue-router'
-
-import HomeView from '@/views/HomeView.vue'
-import SigninView from '@/views/SigninView.vue'
-import PersonalCabinet from '@/views/PersonalCabinet.vue'
-import UserProfile from '@/views/UserProfile.vue'
-import UserServices from '@/views/UserServices.vue'
-import UserSecuritySettings from '@/views/UserSecuritySettings.vue'
-import UserAccountSettings from '@/views/UserAccountSettings.vue'
-import SignUp from '@/views/SignUp.vue'
+import store from "@/store";
 
 const routes = [
   {
     path: '/',
     name: 'home',
-    component: HomeView
+    component: () => import('@/views/HomeView.vue')
   },
   {
     path: '/signin',
     name: 'signin',
-    component: SigninView
+    props: (route) => ({ redirect_url: route.query.redirect_url }),
+    component: () => import('@/views/SignInView.vue')
   },
   {
     path: '/signup',
     name: 'signup',
-    component: SignUp
+    component: () => import('@/views/SignUp.vue')
   },
   {
     path: '/personal',
     name: 'personal',
-    component: PersonalCabinet,
+    component: () => import('@/views/PersonalCabinet.vue'),
     children: [
       {
         path: '',
         name: 'profile',
-        component: UserProfile,
+        component: () => import('@/views/UserProfile.vue'),
       },
       {
         path: 'services',
         name: 'services',
-        component: UserServices,
+        component: () => import('@/views/UserServices.vue'),
       },
       {
         path: 'security',
         name: 'security',
-        component: UserSecuritySettings,
+        component: () => import('@/views/UserSecuritySettings.vue'),
       },
       {
         path: 'settings',
         name: 'settings',
-        component: UserAccountSettings,
+        component: () => import('@/views/UserAccountSettings.vue'),
       },
     ]
   }
@@ -60,13 +53,11 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  const refreshToken = localStorage.getItem('refresh_token');
-
-  if ((to.path === '/signin' || to.path === '/signup') && (refreshToken)) {
+  if ((to.path === '/signin' || to.path === '/signup') && (store.getters['auth/isAuthorized'])) {
     next('/personal');
-  } else {
-    next();
   }
+
+  next();
 });
 
 export default router

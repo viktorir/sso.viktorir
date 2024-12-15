@@ -11,11 +11,15 @@
   },
   "dependencies": {
     "axios": "^1.7.2",
+    "axios-auth-refresh": "^3.3.6",
+    "axios-retry": "^4.5.0",
     "core-js": "^3.8.3",
     "jwt-decode": "^4.0.0",
     "vue": "^3.2.13",
     "vue-cookies": "^1.8.4",
+    "vue-i18n": "^11.0.0-beta.1",
     "vue-router": "^4.0.3",
+    "vue-uuid": "^3.0.0",
     "vuex": "^4.0.0"
   },
   "devDependencies": {

@@ -15,25 +15,27 @@ type User struct {
 	FatherName   string `json:"father_name"`
 }
 
-func CreateOne(login, passwordHash, phoneNumber, email, firstName, lastName, fatherName string) (id int64, err error) {
-	query := "INSERT INTO sso_service.users (login, password_hash, phone_number, email, first_name, last_name, father_name) VALUES ($1, $2, $3, $4, $5, $6, $7) returning id;"
+func Create(login, passwordHash, phoneNumber, email, firstName, lastName, fatherName string) (id int64, err error) {
+	query := "INSERT INTO users (login, password_hash, phone_number, email, first_name, last_name, father_name) VALUES ($1, $2, $3, $4, $5, $6, $7) returning id;"
 	err = database.Sql.QueryRow(query, login, passwordHash, phoneNumber, email, firstName, lastName, fatherName).Scan(&id)
+	query = "INSERT INTO user_service_role_list (user_id, service_id, role_id) VALUES ($1, (SELECT id FROM services WHERE name = 'sso.viktorir'), (SELECT id FROM roles WHERE name = 'is_user'))"
+	_, err = database.Sql.Exec(query, id)
 	return
 }
 
-func FindOneByID(id int) (u User, err error) {
-	err = database.Sql.QueryRow("SELECT id, login, password_hash, phone_number, email, first_name, last_name, father_name FROM sso_service.users WHERE id = $1", id).Scan(&u.Id, &u.Login, &u.PasswordHash, &u.PhoneNumber, &u.Email, &u.FirstName, &u.LastName, &u.FatherName)
+func FindByID(id int) (u User, err error) {
+	err = database.Sql.QueryRow("SELECT id, login, password_hash, phone_number, email, first_name, last_name, father_name FROM users WHERE id = $1", id).Scan(&u.Id, &u.Login, &u.PasswordHash, &u.PhoneNumber, &u.Email, &u.FirstName, &u.LastName, &u.FatherName)
 	return
 }
 
-func FindOneByLogin(login string) (u User, err error) {
-	err = database.Sql.QueryRow("SELECT id, login, password_hash, phone_number, email, first_name, last_name, father_name FROM sso_service.users WHERE login = $1", login).Scan(&u.Id, &u.Login, &u.PasswordHash, &u.PhoneNumber, &u.Email, &u.FirstName, &u.LastName, &u.FatherName)
+func FindByLogin(login string) (u User, err error) {
+	err = database.Sql.QueryRow("SELECT id, login, password_hash, phone_number, email, first_name, last_name, father_name FROM users WHERE login = $1", login).Scan(&u.Id, &u.Login, &u.PasswordHash, &u.PhoneNumber, &u.Email, &u.FirstName, &u.LastName, &u.FatherName)
 	return
 }
 
 func (u User) GetRoles() (roleMap map[string][]string, err error) {
 	roleMap = make(map[string][]string)
-	rows, err := database.Sql.Query("SELECT (SELECT name FROM sso_service.services WHERE services.id = list.service_id) AS service, (SELECT name FROM sso_service.roles WHERE roles.id = list.role_id) AS role FROM sso_service.user_service_role_list AS list WHERE user_id = $1;", u.Id)
+	rows, err := database.Sql.Query("SELECT (SELECT name FROM services WHERE services.id = list.service_id) AS service, (SELECT name FROM roles WHERE roles.id = list.role_id) AS role FROM user_service_role_list AS list WHERE user_id = $1;", u.Id)
 	if err != nil {
 		return
 	}

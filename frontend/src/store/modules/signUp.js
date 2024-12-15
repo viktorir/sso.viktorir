@@ -1,4 +1,4 @@
-import axios from "axios";
+import api from "@/api/api";
 
 export default {
   namespaced: true,
@@ -72,6 +72,7 @@ export default {
       state.fatherName = null;
       state.fatherName = null;
       state.password = null;
+      state.passwordRepeat = null;
     }
   },
 
@@ -91,21 +92,25 @@ export default {
       commit('CLEAR_ERROR');
 
       try {
-        const response = await axios.post('http://localhost:8082/api/v1/signon', data);
-        const id = response.data.id
+        const response = await api.post('/signon', data);
         if (response.status != 200) {
           commit('SET_ERROR', "Register Error! Status " + response.status);
           console.error("Register Error! Status " + response.status);
+          dispatch('popup/showPopup', {type: 'error', heading: 'Ошибка регистрации', message: response.statusText}, {root: true})
           return;
         }
+        const id = response.data.id
         console.log(id)
-        commit('signin/SET_LOGIN', data.login, { root: true })
-        commit('signin/SET_PASSWORD', data.password, { root: true })
-        await dispatch('signin/signin', router, { root: true })
+
+        commit('signIn/SET_LOGIN', data.login, { root: true })
+        commit('signIn/SET_PASSWORD', data.password, { root: true })
+        dispatch('popup/showPopup', {type: 'succes', message: 'Регистрация успешна!'}, {root: true})
+        await dispatch('signIn/signin', router, { root: true })
         commit('CLEAR_ALL_DATA')
       } catch (error) {
-        console.error("Ошибка входа:", error);
-        commit('SET_ERROR', "Ошибка входа. Проверьте ваши учетные данные.");
+        commit('SET_ERROR', "Ошибка регистрации. Проверьте ваши данные.");
+        console.error("Ошибка регистрации:", error);
+        dispatch('popup/showPopup', {type: 'error', heading: 'Ошибка регистрации', message: error}, {root: true})
       } finally {
         commit('SET_LOADING', false);
       }

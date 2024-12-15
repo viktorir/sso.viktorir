@@ -17,22 +17,21 @@ type Config struct {
 }
 
 func Connect() (err error) {
-
 	config := Config{
 		"localhost",
 		"5432",
 		"postgres",
 		"235711",
-		"test",
+		"sso_viktorir",
 	}
 
 	/*
 		config := Config{
-			host:     os.Getenv("PSQL_HOST"),
-			port:     os.Getenv("PSQL_PORT"),
-			user:     os.Getenv("PSQL_USER"),
-			password: os.Getenv("PSQL_PASSWORD"),
-			dbname:   os.Getenv("PSQL_DBNAME"),
+			host:     os.Getenv("PGSQL_HOST"),
+			port:     os.Getenv("PGSQL_PORT"),
+			user:     os.Getenv("PGSQL_USER"),
+			password: os.Getenv("PGSQL_PASSWORD"),
+			dbname:   os.Getenv("PGSQL_DBNAME"),
 		}
 	*/
 
@@ -49,5 +48,9 @@ func Connect() (err error) {
 	}
 
 	err = database.Sql.Ping()
-	return err
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

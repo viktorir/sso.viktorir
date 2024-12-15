@@ -4,11 +4,11 @@
     <hr>
     <form @submit.prevent="signinRouter">
       <!-- <h2>Login</h2> -->
-      <input type="text" placeholder="Login" :value="login" @input="updateLogin" required>
-      <input type="password" placeholder="Password" :value="password" @input="updatePassword" required>
-      <button type="submit">Sign In</button>
-      <p>Don’t have account? <router-link to="/signup">SignUp now!</router-link></p>
-      <a href="#">Forgot password?</a>
+      <input type="text" :placeholder="$t('signin.login')" :value="login" @input="updateLogin" required>
+      <input type="password" :placeholder="$t('signin.password')" :value="password" @input="updatePassword" required>
+      <button type="submit" :disabled="isLoading">{{ $t('signin.button') }}</button>
+      <p>{{ $t('signin.noAccount') }} <router-link to="/signup">{{ $t('signin.signup') }}</router-link></p>
+      <a href="#">{{ $t('signin.forgotPassword') }}</a>
     </form>
   </section>
 </template>
@@ -18,14 +18,18 @@ import { mapState, mapMutations, mapGetters, mapActions } from 'vuex';
 export default {
   name: 'SigninView',
   computed: {
-    ...mapState('signin', ['login', 'password']),
-    ...mapGetters('signin', ['isLoading', 'error'])
+    ...mapState('signIn', ['login', 'password']),
+    ...mapGetters('signIn', ['isLoading', 'error'])
   },
   methods: {
-    ...mapMutations('signin', ['SET_LOGIN', 'SET_PASSWORD']),
-    ...mapActions('signin', ['signin']),
+    ...mapMutations('signIn', ['SET_LOGIN', 'SET_PASSWORD']),
+    ...mapActions('signIn', ['signin']),
     async signinRouter() {
-      await this.signin(this.$router);
+      console.log(this.$route.query)
+      await this.signin({ 
+        router: this.$router, 
+        querys: this.$route.query 
+      });
     },
     updateLogin(event) {
       this.SET_LOGIN(event.target.value);
@@ -122,6 +126,12 @@ export default {
 
         border: none;
         border-radius: 30px;
+
+        transition: background-color 0.2s ease, color 0.2s ease; 
+      }
+
+      button:disabled {
+        background-color: #D4A1A0;
       }
     }
   }
