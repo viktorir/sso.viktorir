@@ -9,19 +9,21 @@ CREATE TABLE IF NOT EXISTS roles
 
     CONSTRAINT roles_pkey PRIMARY KEY (id)
 );
+--INSERT INTO roles (name) VALUES ('is_user'), ('is_admin');
 
 CREATE TABLE IF NOT EXISTS services
 (
     id serial NOT NULL,
     name varchar(255) NOT NULL UNIQUE,
     description text,
-    domain text,
+    domain text NOT NULL UNIQUE,
     deleted_at timestamptz,
     created_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at timestamptz,
 
     CONSTRAINT services_pkey PRIMARY KEY (id)
 );
+--INSERT INTO services (name, domain) VALUES ('sso.viktorir', 'sso.viktorir.ru');
 
 CREATE TABLE IF NOT EXISTS users
 (

@@ -11,7 +11,7 @@ const routes = [
     path: '/signin',
     name: 'signin',
     props: (route) => ({ redirect_url: route.query.redirect_url }),
-    component: () => import('@/views/SignInView.vue')
+    component: () => import('@/views/SigninView.vue')
   },
   {
     path: '/signup',
@@ -22,6 +22,7 @@ const routes = [
     path: '/personal',
     name: 'personal',
     component: () => import('@/views/PersonalCabinet.vue'),
+    meta: { requiresAuth: true },
     children: [
       {
         path: '',
@@ -53,11 +54,28 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  if ((to.path === '/signin' || to.path === '/signup') && (store.getters['auth/isAuthorized'])) {
-    next('/personal');
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
+  const isAuthorized = store.getters['auth/isAuthorized']; 
+
+  if (requiresAuth && !isAuthorized) {
+    window.$notification.warning({
+      title: 'Не авторизован!',
+      content: 'После авторизации вы будете перенаправлены обратно на страницу.',
+      duration: 3000 
+    });
+    return next('/signin');
   }
 
-  next();
+  if ((to.path === '/signin' || to.path === '/signup') && isAuthorized) {
+    window.$notification.info({
+      title: 'Авторизован!',
+      content: 'Вы уже авторизованы и перенаправлены в личный кабинет.',
+      duration: 3000 
+    });
+    return next('/personal');
+  }
+
+  return next();
 });
 
 export default router

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"database/sql"
+	"errors"
 	"github.com/gofiber/fiber/v2"
 	"golang.org/x/crypto/bcrypt"
 	"log"
@@ -60,8 +61,9 @@ func SignIn(ctx *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
 
+	log.Println(req)
 	candidate, err := user.FindByLogin(req.Login)
-	if err == sql.ErrNoRows {
+	if errors.Is(err, sql.ErrNoRows) {
 		return fiber.NewError(fiber.StatusBadRequest, "User not found!")
 	}
 	if err != nil {

@@ -45,36 +45,52 @@ export default {
   },
 
   actions: {
-    async signin({ commit, getters, dispatch }, {router, querys}) {
+    updateLogin({ commit }, payload) {
+      commit('SET_LOGIN', payload);
+    },
+    updatePassword({ commit }, payload) {
+      commit('SET_PASSWORD', payload)
+    },
+    async signin({ commit, getters }, {router, querys}) {
       if (querys && querys.redirect_url) commit('SET_REDIRECT_URL', querys.redirect_url);
-
+      
       const data = {
         login: getters['login'],
         password: getters['password'],
         redirect_url: getters['redirect_url']
       };
-      console.log(data.redirect_url)
 
       commit('SET_LOADING', true);
       commit('CLEAR_ERROR');
-
+      
       try {
+        console.log(data)
         const response = await api.post('/signin', data);
-        console.log()
+        console.log('hello')
         if(response.status == 200 && data.redirect_url) {
           window.location.href = data.redirect_url
         } else {
           const accessToken = response.data.access_token
           commit('auth/SET_ACCESS_TOKEN', accessToken, {root: true})
+          commit('auth/SET_AUTHORIZED', null, {root: true})
           router.push('/personal');
-  
-          dispatch('popup/showPopup', {type: 'succes', message: 'Авторизация успешна!'}, {root: true})
+
+          window.$notification.success({
+            title: 'Авторизация успешна!',
+            content: 'Добро пожаловать!',
+            duration: 3000 
+          });
+          
         }
         commit('CLEAR_ALL_DATA');
       } catch (error) {
         commit('SET_ERROR', "Ошибка входа.");
         console.error("Ошибка входа:", error);
-        dispatch('popup/showPopup', {type: 'error', heading: 'Ошибка входа', message: error}, {root: true})
+        window.$notification.error({
+          title: 'Ошибка авторизациии!',
+          content: 'Проверьте учетные данные.',
+          duration: 3000
+        });
         
       } finally {
         commit('SET_LOADING', false);

@@ -1,0 +1,20 @@
+version: '3.9'
+
+services:
+  sso_viktorir_backend:
+    image: viktorir/sso.viktorir_backend:latest
+    container_name: sso_viktorir_backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      PGSQL_HOST: db
+      PGSQL_PORT: 5432
+      PGSQL_USER: your_pgsql_user
+      PGSQL_PASSWORD: your_pgsql_password
+      PGSQL_DBNAME: your_pgsql_dbname
+    ports:
+      - "80:80"
+    depends_on:
+      - db

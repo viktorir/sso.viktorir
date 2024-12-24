@@ -1,151 +1,130 @@
 <template>
-  <section>
-    <h1 class="logo"><router-link to="/">SSO.viktorir</router-link></h1>
-    <hr>
-    <form @submit.prevent="signUpRouter">
-      <!-- <h2>Register</h2> -->
-      <input type="text" :placeholder="$t('signup.login')" :value="login" @input="updateLogin" required>
-      <input type="tel" :placeholder="$t('signup.phoneNumber')" :value="phoneNumber" @input="updatePhoneNumber" required>
-      <input type="email" :placeholder="$t('signup.email')" :value="email" @input="updateEmail">
-      <input type="text" :placeholder="$t('signup.lastName')" :value="lastName" @input="updateLastName">
-      <input type="text" :placeholder="$t('signup.firstName')" :value="firstName" @input="updateFirstName">
-      <input type="text" :placeholder="$t('signup.fatherName')" :value="fatherName" @input="updateFatherName">
-      <input type="password" :placeholder="$t('signup.password')" :value="password" @input="updatePassword" required>
-      <input type="password" :placeholder="$t('signup.passwordRepeat')" :value="passwordRepeat" @input="updatePasswordRepeat" required>
-      <button type="submit">{{ $t('signup.button') }}</button>
-      <p>{{ $t('signup.alreadyAccount') }} <router-link to="/signin">{{ $t('signup.signin') }}</router-link></p>
-    </form>
-  </section>
+  <n-flex vertical align="center">
+    <n-h1 style="margin-top: 1em;">
+      <router-link to="/">SSO.viktorir</router-link>
+    </n-h1>
+
+    <n-divider>Registration</n-divider>
+    
+    <n-form @submit.prevent="signUpRouter" ref="signUpForm" :model="form" :rules="rules">
+      <n-form-item :label="$t('signup.login')" path="login">
+        <n-input type="text" :placeholder="$t('signup.login')" v-model:value="form.login" @update:value="updateLogin" clearable required />
+      </n-form-item>
+      <n-form-item :label="$t('signup.phoneNumber')" path="phoneNumber">
+        <n-input type="tel" :placeholder="$t('signup.phoneNumber')" v-model:value="form.phoneNumber" @update:value="updatePhoneNumber" required />
+      </n-form-item>
+      <n-form-item :label="$t('signup.email')" path="email">
+        <n-auto-complete type="email" :placeholder="$t('signup.email')" v-model:value="form.email" @update:value="updateEmail" :options="emailSuggestions" autocomplete="email" />
+      </n-form-item>
+      <n-form-item :label="$t('signup.password')" path="password">
+        <n-input type="password" :placeholder="$t('signup.password')" v-model:value="form.password" @update:value="updatePassword" required />
+      </n-form-item>
+      <n-form-item :label="$t('signup.passwordRepeat')" path="passwordRepeat">
+        <n-input type="password" :placeholder="$t('signup.passwordRepeat')" v-model:value="form.passwordRepeat" @update:value="updatePasswordRepeat" required />
+      </n-form-item>
+      <n-form-item>
+        <n-button type="primary" :disabled="isLoading" @click="signUpRouter">{{ $t('signup.button') }}</n-button>
+      </n-form-item>
+      <n-form-item>
+        <n-text>{{ $t('signup.alreadyAccount') }} <router-link to="/signin" style="color: #5656FF;">{{ $t('signup.signin') }}</router-link></n-text>
+      </n-form-item>
+    </n-form>
+  </n-flex>
 </template>
   
 <script>
-  import { mapState, mapMutations, mapGetters, mapActions } from 'vuex';
+  import { mapState, mapGetters, mapActions } from 'vuex';
+  import { NFlex, NForm, NFormItem, NDivider, NAutoComplete } from "naive-ui";
+
   export default {
     name: 'SignUp',
+    components: {
+      NFlex,
+      NForm, 
+      NFormItem, 
+      NDivider,
+      NAutoComplete
+    },
     computed: {
       ...mapState('signUp', ['login', 'password', 'email', 'phoneNumber', 'lastName', 'firstName', 'fatherName', 'passwordRepeat']),
-      ...mapGetters('signUp', ['isLoading', 'error'])
+      ...mapGetters('signUp', ['isLoading', 'error']),
+      form() {
+        return {
+          login: this.login,
+          phoneNumber: this.phoneNumber,
+          email: this.email,
+          password: this.password,
+          passwordRepeat: this.passwordRepeat,
+        };
+      },
+      emailSuggestions() {
+        const email = this.form.email || "";
+        const prefix = email.split("@")[0] || "";
+        return ["@gmail.com", "@yandex.ru", "@mail.ru"].map((suffix) => {
+          return {
+            label: prefix + suffix,
+            value: prefix + suffix,
+          };
+        })
+      }
+    },
+    data() {
+      return {
+        rules: {
+          login: [
+            { required: true, message: "Логин обязателен для заполнения", trigger: "blur" },
+            { min: 4, max: 128, message: "Логин должен быть от 4 до 128 символов", trigger: "blur" },
+          ],
+          phoneNumber: [
+            { required: true, message: "Номер телефона обязателен", trigger: "blur" },
+            { 
+              pattern: /^7\d{10}$/, 
+              message: "Формат номера: 7XXXXXXXXXX", 
+              trigger: "blur" 
+            },
+          ],
+          email: [
+            { 
+              type: "email", 
+              message: "Введите корректный email", 
+              trigger: ["blur", "input"],
+            },
+          ],
+          password: [
+            { required: true, message: "Пароль обязателен", trigger: "blur" },
+            { min: 8, max: 256, message: "Пароль должен быть от 8 до 256 символов", trigger: "blur" },
+          ],
+          passwordRepeat: [
+            { required: true, message: "Повторите пароль", trigger: "blur" },
+            { 
+              validator: (rule, value, callback) => {
+                if (value !== this.password) {
+                  callback(new Error("Пароли не совпадают"));
+                } else {
+                  callback();
+                }
+              }, 
+              trigger: "blur",
+            },
+          ],
+        },
+      };
     },
     methods: {
-      ...mapMutations('signUp', ['SET_LOGIN', 'SET_PASSWORD', 'SET_PHONE_NUMBER', 'SET_EMAIL', 'SET_LAST_NAME', 'SET_FIRST_NAME', 'SET_FATHER_NAME', 'SET_PASSWORD_REPEAT']),
-      ...mapActions('signUp', ['signup']),
+      ...mapActions('signUp', ['signup', 'updateLogin', 'updatePhoneNumber', 'updateEmail', 'updateLastName', 'updateFirstName', 'updateFatherName', 'updatePassword', 'updatePasswordRepeat']),
       async signUpRouter() {
-        await this.signup(this.$router)
-      },
-      updateLogin(event) {
-        this.SET_LOGIN(event.target.value)
-      },
-      updatePhoneNumber(event) {
-        this.SET_PHONE_NUMBER(event.target.value)
-      },
-      updateEmail(event) {
-        this.SET_EMAIL(event.target.value)
-      },
-      updateLastName(event) {
-        this.SET_LAST_NAME(event.target.value)
-      },
-      updateFirstName(event) {
-        this.SET_FIRST_NAME(event.target.value)
-      },
-      updateFatherName(event) {
-        this.SET_FATHER_NAME(event.target.value)
-      },
-      updatePassword(event) {
-        this.SET_PASSWORD(event.target.value)
-      },
-      updatePasswordRepeat(event) {
-        this.SET_PASSWORD_REPEAT(event.target.value)
+        try {
+          await this.$refs.signUpForm.validate(); // Если форма невалидна - выплёвываем ошибку, нехочу делать отдельную функцию
+          await this.signup(this.$router);
+        } catch (error) {
+          window.$notification.error({
+            title: 'Форма невалидна!',
+            content: 'Заполните все поля верно.',
+            duration: 3000
+          });
+        }
       },
     }
   }
-  </script>
+</script>
   
-  <style lang="scss" scoped>
-    section {
-      $color-bg-dark: #1C1C1C;
-      $color-text-dark: #FFFFFF;
-      $color-accent-dark: #E31C25;
-      $color-link-dark: #5656FF;
-  
-      margin: 4em 2em;
-  
-      height: 100%;
-  
-      display: flex;
-      flex-flow: row nowrap;
-      justify-content: space-between;
-  
-      h1 {
-        margin: auto;
-  
-        flex: 1;
-  
-        font-size: 6em;
-  
-        a {
-          color: $color-text-dark;
-        }
-      }
-  
-      a {
-        text-decoration: none;
-        filter: none;
-        color: $color-link-dark;
-        transition: filter 0.2s ease-in-out;
-      }
-  
-      a:hover {
-        filter: drop-shadow(0px 4px 4px #E31C25);
-      }
-  
-      a:active {
-        filter: drop-shadow(0px 4px 0px #E31C25);
-      }
-  
-      hr {
-        margin: 0 1em;
-        flex-shrink: 0;
-  
-        border: 2px solid $color-accent-dark;
-        border-radius: 30px;
-      }
-  
-      form {
-        margin: auto;
-  
-        display: flex;
-        flex-flow: column nowrap;
-        align-items: center;
-  
-        flex: 1;
-  
-        input {
-          margin-bottom: 1em;
-          padding: 0.3em 2em;
-  
-          min-width: max-content;
-          max-width: 50%;
-  
-          font-size: 1.5em;
-          color: $color-text-dark;
-  
-          background-color: $color-bg-dark;
-          border: 2px solid $color-text-dark;
-          border-radius: 10px;
-        } 
-  
-        button {
-          margin: 1em 0;
-          padding: 0.4em 3em;
-  
-          font-size: 1.5em;
-          color: $color-text-dark;
-  
-          background-color: $color-accent-dark;
-  
-          border: none;
-          border-radius: 30px;
-        }
-      }
-    }
-  </style>

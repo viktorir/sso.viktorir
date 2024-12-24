@@ -1,65 +1,111 @@
 <template>
     <LoaderSpinner v-if="isUserLoading" />
     <main v-if="error">{{ error }}</main>
-    <main v-if="user != {} && !isUserLoading">
-        <aside>
-            <h1>sso.viktorir</h1>
-            <p>{{ user.login }}</p>
-            <nav id="top_menu">
-                <router-link to="/personal">
-                    <img src="@/assets/icons/user.svg" alt="User">
-                    {{ $t('personalMenu.user') }}
-                    <img :src="chevronIcon('/personal')" alt="chevron" class="chevron">
-                </router-link>
-                <router-link to="/personal/services">
-                    <img src="@/assets/icons/browser.svg" alt="Services">
-                    {{ $t('personalMenu.services') }}
-                    <img :src="chevronIcon('/personal/services')" alt="chevron" class="chevron">
-                </router-link>
-                <router-link to="/personal/security">
-                    <img src="@/assets/icons/shield.svg" alt="Security">
-                    {{ $t('personalMenu.security') }}
-                    <img :src="chevronIcon('/personal/security')" alt="chevron" class="chevron">
-                </router-link>
-                <router-link to="/personal/settings">
-                    <img src="@/assets/icons/gear.svg" alt="Settings">
-                    {{ $t('personalMenu.settings') }}
-                    <img :src="chevronIcon('/personal/settings')" alt="chevron" class="chevron">
-                </router-link>
-            </nav>
-            <nav id="bottom_menu">
-                <!-- <router-link to="/admin">
-                    {{ $t('personalMenu.admin') }}
-                </router-link> --> 
-                <router-link to="/" @click.prevent="$store.dispatch('auth/signOut', null, {root: true})">
-                    <img src="@/assets/icons/arrow-right-from-bracket.svg" alt="Logout">
-                    {{ $t('personalMenu.signout') }}
-                </router-link>
-            </nav>
-        </aside>
-        <router-view></router-view>
-    </main>
+    <n-layout v-if="user != {} && !isUserLoading" has-sider >
+        <n-layout-sider 
+            bordered 
+            show-trigger
+            collapse-mode="width"
+            :collapsed="collapsed" 
+            :collapsed-width="64"
+            :width="240"
+            :native-scrollbar="false"
+            @collapse="collapsed = true"
+            @expand="collapsed = false"
+            style="height: 100%;"
+            
+        >
+            <n-h2 v-if="!collapsed" style="margin-top: 1em; text-align: center;">SSO.viktorir</n-h2>
+            <n-text v-if="!collapsed" style="display: block; text-align: center;">#{{ user.login }}</n-text>
+            <n-menu
+                :collapsed="collapsed"
+                :collapsed-width="64"
+                :collapsed-icon-size="22"
+                :options="topMenuOptions"
+                :value="selectedMenu"
+            />
+
+            <n-menu
+                :collapsed="collapsed"
+                :collapsed-width="64"
+                :collapsed-icon-size="22"
+                :options="bottomMenuOptions"
+                style="margin: 2em 0;"
+            />
+        </n-layout-sider>
+        <n-layout-content content-style="padding: 1em">
+            <router-view />
+        </n-layout-content>
+    </n-layout>
 </template>
 
 <script>
+import { h } from 'vue'
 import { mapGetters } from 'vuex'
+import { NLayout, NLayoutSider, NLayoutContent, NMenu, NIcon } from 'naive-ui'
+import { PersonOutline, List, ShieldOutline, SettingsOutline, ExitOutline } from '@vicons/ionicons5';
 
 import LoaderSpinner from '@/components/LoaderSpinner.vue';
-
-import chevronRight from '@/assets/icons/chevron-right.svg';
-import chevronLeft from '@/assets/icons/chevron-left.svg';
 
 export default {
     name: 'PersonalCabinet',
     components: {
-        LoaderSpinner
+        LoaderSpinner,
+        NLayout, 
+        NLayoutSider, 
+        NLayoutContent,
+        NMenu,
+    },
+    data() {
+        return {
+            collapsed: window.innerWidth <= 768,
+            topMenuOptions: [
+                {
+                    label: this.$t('personalMenu.user'),
+                    key: '/personal',
+                    icon: () => h(NIcon, null, { default: () => h(PersonOutline) }),
+                    onClick: () => this.$router.push('/personal') 
+                },
+                {
+                    label: this.$t('personalMenu.services'),
+                    key: '/personal/services',
+                    icon: () => h(NIcon, null, { default: () => h(List) }),
+                    onClick: () => this.$router.push('/personal/services') 
+                },
+                {
+                    label: this.$t('personalMenu.security'),
+                    key: '/personal/security',
+                    icon: () => h(NIcon, null, { default: () => h(ShieldOutline) }),
+                    onClick: () => this.$router.push('/personal/security')
+                },
+                {
+                    label: this.$t('personalMenu.settings'),
+                    key: '/personal/settings',
+                    icon: () => h(NIcon, null, { default: () => h(SettingsOutline) }),
+                    onClick: () => this.$router.push('/personal/settings')
+                },
+                
+            ],
+            bottomMenuOptions: [
+                {
+                    label: this.$t('personalMenu.signout'),
+                    key: '/logout',
+                    icon: () => h(NIcon, null, { default: () => h(ExitOutline) }),
+                    onClick: () => this.signOut()
+                }
+            ]
+        };
     },
     computed: {
-        ...mapGetters('personal', ['user', 'isUserLoading', 'error'])  
+        ...mapGetters('personal', ['user', 'isUserLoading', 'error']),
+        selectedMenu() {
+            return this.$route.path
+        } 
     }, 
     methods: {
-        chevronIcon(path) {
-            return this.$route.path === path ? chevronRight : chevronLeft;
+        async signOut() {
+            await this.$store.dispatch('auth/signOut', null, { root: true });
+            this.$router.push('/');
         }
     },
     async created() {
@@ -68,73 +114,9 @@ export default {
 }
 </script>
 
-<style>
-main {
+<style scoped> 
+.n-scrollbar-content {
+    height: 100%;
     display: flex;
-    height: 100vh;
-}
-
-main::-webkit-scrollbar {
-  display: none; 
-}
-
-aside {
-    display: flex;
-    flex-direction: column;
-    width: 250px;
-    padding: 8px 36px;
-    border-right: 2px solid #E31C25;
-
-    h1 {
-        margin: 0;
-        font-size: 48px;
-    }
-
-    p {
-        margin: 0;
-    }
-
-    nav {
-        margin: 16px 0;
-    }
-
-    #top_menu {
-        flex: 1;
-    }
-}
-
-nav {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 10px;
-
-    a {
-        margin: 4px 0;
-        color: #FFFFFF;
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        img {
-            margin: 8px;
-        }
-
-        .chevron {
-            margin-left: auto;
-        }
-    }
-
-    a:hover {
-        img {
-            margin: 8px;
-            margin-right: 16px;
-        }
-
-        .chevron {
-            margin-left: auto;
-            margin-right: 8px;
-        }
-    }
 }
 </style>

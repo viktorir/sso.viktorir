@@ -4,25 +4,27 @@ export default {
   namespaced: true,
 
   state: {
-    isAutorized: false,
+    isAuthorized: localStorage.getItem('is_authorized') === "true" || false,
     accessToken: localStorage.getItem('access_token') || null,
   },
 
   getters: {
-    isAutorized: (state) => state.isAutorized,
+    isAuthorized: (state) => state.isAuthorized,
     accessToken: (state) => state.accessToken,
   },
 
   mutations: {
-    SET_AUTORIZED(state) {
-      state.isAutorized = true
+    SET_AUTHORIZED(state) {
+      state.isAuthorized = true
+      localStorage.setItem('is_authorized', true)
     },
     SET_ACCESS_TOKEN(state, token) {
       localStorage.setItem('access_token', token);
       state.accessToken = token;
     },
-    SET_UNAUTORIZED(state) {
-      state.isAutorized = false
+    SET_UNAUTHORIZED(state) {
+      state.isAuthorized = false
+      localStorage.setItem('is_authorized', false)
     },
     CLEAR_ACCESS_TOKEN(state) {
       localStorage.removeItem('access_token');
@@ -34,20 +36,15 @@ export default {
     async checkAuthorization({ commit }) {
       try {
         const response = await api.post('/refresh');
-        switch (response.status) {
-          case 401:
-            commit('SET_UNAUTORIZED')
-            return;
-          case 200:
-            commit('SET_AUTORIZED')
-            return;
-        
-          default:
-            throw new Error("Ошибка проверки авторизации, код " + response.status)
+        if (response.status == 200 || response.status == 204) {
+          commit('SET_AUTHORIZED')
+          return
+        } else {
+          throw new Error("Ошибка проверки авторизации, код " + response.status)
         }
       } catch (error) {
         console.error("Ошибка проверки авторизации:", error);
-        throw error;
+        commit('SET_UNAUTHORIZED')
       }
     },
 
@@ -64,6 +61,7 @@ export default {
         return accessToken;
       } catch (error) {
         console.error("Ошибка обновления токена:", error);
+        commit('SET_UNAUTHORIZED')
         commit('CLEAR_ACCESS_TOKEN');
         throw error;
       }
@@ -71,10 +69,12 @@ export default {
 
     async signOut({ commit }) {
       try {
+        
         await api.post('/signout');
       } catch (error) {
         console.error("Ошибка выхода:", error);
       } finally {
+        commit('SET_UNAUTHORIZED')
         commit('CLEAR_ACCESS_TOKEN');
       }
     },

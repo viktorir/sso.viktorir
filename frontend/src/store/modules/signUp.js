@@ -77,6 +77,30 @@ export default {
   },
 
   actions: {
+    updateLogin({ commit }, payload) {
+      commit('SET_LOGIN', payload)
+    },
+    updatePhoneNumber({ commit }, payload) {
+      commit('SET_PHONE_NUMBER', payload)
+    },
+    updateEmail({ commit }, payload) {
+      commit('SET_EMAIL', payload)
+    },
+    updateLastName({ commit }, payload) {
+      commit('SET_LAST_NAME', payload)
+    },
+    updateFirstName({ commit }, payload) {
+      commit('SET_FIRST_NAME', payload)
+    },
+    updateFatherName({ commit }, payload) {
+      commit('SET_FATHER_NAME', payload)
+    },
+    updatePassword({ commit }, payload) {
+      commit('SET_PASSWORD', payload)
+    },
+    updatePasswordRepeat({ commit }, payload) {
+      commit('SET_PASSWORD_REPEAT', payload)
+    },
     async signup({ commit, state, dispatch }, router) {
       const data = {
         login: state.login,
@@ -96,21 +120,31 @@ export default {
         if (response.status != 200) {
           commit('SET_ERROR', "Register Error! Status " + response.status);
           console.error("Register Error! Status " + response.status);
-          dispatch('popup/showPopup', {type: 'error', heading: 'Ошибка регистрации', message: response.statusText}, {root: true})
+          window.$notification.error({
+            title: 'Ошибка регистрации!',
+            content: 'Упс, что то не так.',
+            duration: 3000
+          });
           return;
         }
-        const id = response.data.id
-        console.log(id)
 
         commit('signIn/SET_LOGIN', data.login, { root: true })
         commit('signIn/SET_PASSWORD', data.password, { root: true })
-        dispatch('popup/showPopup', {type: 'succes', message: 'Регистрация успешна!'}, {root: true})
-        await dispatch('signIn/signin', router, { root: true })
+        window.$notification.success({
+          title: 'Регистрация успешна!',
+          content: 'Спасибо!',
+          duration: 3000 
+        });
+        await dispatch('signIn/signin', { router: router, querys: null }, { root: true })
         commit('CLEAR_ALL_DATA')
       } catch (error) {
         commit('SET_ERROR', "Ошибка регистрации. Проверьте ваши данные.");
-        console.error("Ошибка регистрации:", error);
-        dispatch('popup/showPopup', {type: 'error', heading: 'Ошибка регистрации', message: error}, {root: true})
+        console.log(error)
+        window.$notification.error({
+          title: 'Ошибка регистрации',
+          content: 'Проверьте ваши данные и повторите попытку.',
+          duration: 3000
+        });
       } finally {
         commit('SET_LOADING', false);
       }

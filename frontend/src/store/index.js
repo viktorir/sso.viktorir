@@ -4,7 +4,7 @@ import signIn from '@/store/modules/signin'
 import auth from '@/store/modules/auth'
 import personal from '@/store/modules/personal'
 import signUp from '@/store/modules/signUp'
-import popup from '@/store/modules/popup'
+import settings from '@/store/modules/settings'
 
 export default createStore({
   modules: {
@@ -12,6 +12,6 @@ export default createStore({
     auth,
     personal,
     signUp,
-    popup
+    settings
   }
 })

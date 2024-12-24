@@ -1,0 +1,9 @@
+version: '3.9'
+
+services:
+  sso_viktorir_frontend:
+    image: viktorir/sso.viktorir_frontend
+    container_name: sso_viktorir_frontend
+    ports:
+      - 80:80
+    restart: unless-stopped
